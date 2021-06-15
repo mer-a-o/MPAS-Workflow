@@ -8,6 +8,7 @@ variational:
       nml_file: InnerNamelistFile
       streams_file: InnerStreamsFile
       deallocate non-da fields: true
+      interpolation type: GeometryInterpolationType
     ninner: '60'
     gradient norm reduction: 1e-10
     test: 'on'
@@ -18,6 +19,7 @@ variational:
 #      nml_file: InnerNamelistFile
 #      streams_file: InnerStreamsFile
 #      deallocate non-da fields: true
+#      interpolation type: GeometryInterpolationType
 #    ninner: '60'
 #    gradient norm reduction: 1e-10
 #    test: 'on'
@@ -32,6 +34,7 @@ cost function:
     nml_file: OuterNamelistFile
     streams_file: OuterStreamsFile
     deallocate non-da fields: true
+    interpolation type: GeometryInterpolationType
   analysis variables: &incvars [AnalysisVariables]
   background:
     state variables: [StateVariables]

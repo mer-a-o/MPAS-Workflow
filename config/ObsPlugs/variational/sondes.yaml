@@ -1,5 +1,5 @@
 - obs space:
-    name: Radiosonde
+    name: sondes
     obsdatain:
       obsfile: InDBDir/sondes_obs_2018041500.h5
     obsdataout:
@@ -25,4 +25,4 @@
     minvalue: 0.0
     maxvalue: 1.0
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType

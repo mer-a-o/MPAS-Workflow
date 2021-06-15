@@ -32,7 +32,7 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua_n15
     obsdatain:
@@ -62,7 +62,7 @@
       <<: *clramsuacrtmopts
       Sensor_ID: amsua_n15
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua_n18
     obsdatain:
@@ -92,7 +92,7 @@
       <<: *clramsuacrtmopts
       Sensor_ID: amsua_n18
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua_metop-a
     obsdatain:
@@ -122,7 +122,7 @@
       <<: *clramsuacrtmopts
       Sensor_ID: amsua_metop-a
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua_metop-b
     obsdatain:
@@ -152,7 +152,7 @@
       <<: *clramsuacrtmopts
       Sensor_ID: amsua_metop-b
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua_aqua
     obsdatain:
@@ -182,4 +182,4 @@
       <<: *clramsuacrtmopts
       Sensor_ID: amsua_aqua
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType

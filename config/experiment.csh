@@ -1,6 +1,7 @@
 #!/bin/csh -f
 
 source config/appindex.csh
+source config/obs.csh
 
 ##################################
 ## Fundamental experiment settings
@@ -30,38 +31,17 @@ setenv MPASGridDescriptor OIE120km
 #     - TODO: enable VarBC
 setenv FirstCycleDate 2018041500
 
-## benchmarkObsList
-# base set of observation types assimilated in all experiments
-set benchmarkObsList = (sondes aircraft satwind gnssroref sfcp clramsua)
-
 ## ExpSuffix
 # a unique suffix to distinguish this experiment from others
-set ExpSuffix = ''
+set ExpSuffix = '_feature--obserrorTuning'
 
 ##############
 ## DA settings
 ##############
-# add IR super-obbing resolution suffixes for variational
-set abi = abi$ABISuperOb[$variationalIndex]
-set ahi = ahi$AHISuperOb[$variationalIndex]
-
-## variationalObsList
-# observation types assimilated in all variational application instances
-# OPTIONS: $benchmarkObsList, cldamsua, clr$abi, all$abi, clr$ahi, all$ahi
-# clr == clear-sky
-# cld == cloudy-sky
-# all == all-sky
-#TODO: separate amsua and mhs config for each instrument_satellite combo
-
-set variationalObsList = ($benchmarkObsList)
-#set variationalObsList = ($benchmarkObsList cldamsua)
-#set variationalObsList = ($benchmarkObsList all$abi)
-#set variationalObsList = ($benchmarkObsList all$ahi)
-#set variationalObsList = ($benchmarkObsList all$abi all$ahi)
 
 ## DAType
 # OPTIONS: 3denvar, eda_3denvar, 3dvarId
-setenv DAType eda_3denvar
+setenv DAType 3denvar
 
 if ( "$DAType" =~ *"eda"* ) then
   ## nEnsDAMembers
@@ -97,21 +77,10 @@ setenv ABEInflation False
 # OPTIONS: 8, 9, 10
 setenv ABEIChannel 8
 
-################
-## HofX settings
-################
-# add IR super-obbing resolution suffixes for hofx
-set abi = abi$ABISuperOb[$hofxIndex]
-set ahi = ahi$AHISuperOb[$hofxIndex]
-
-## hofxObsList
-# observation types simulated in all hofx application instances
-# OPTIONS: $benchmarkObsList, cldamsua, allmhs, clr$abi, all$abi, clr$ahi, all$ahi
-#TODO: separate amsua and mhs config for each instrument_satellite combo
-
-#TODO: upgrade abi and ahi data
-set hofxObsList = ($benchmarkObsList cldamsua allmhs all$abi all$ahi)
-
+## GeometryInterpolationType
+# controls the horizontal interpolation between States/Increments in variational applications
+# OPTIONS: bump, unstructured (recommended)
+setenv GeometryInterpolationType unstructured
 
 #GEFS reference case (override above settings)
 #====================================================
@@ -133,33 +102,3 @@ setenv ExtendedMeanFCTimes T00,T12      # times of the day to run extended forec
 setenv ExtendedEnsFCTimes T00           # times of the day to run ensemble of extended forecasts
 setenv DAVFWindowHR ${CyclingWindowHR}  # window of observations included in AN/BG verification
 setenv FCVFWindowHR 6                   # window of observations included in forecast verification
-
-
-########################
-## experiment name parts
-########################
-
-## derive experiment title parts from above settings
-
-#(1) populate ensemble-related suffix components
-set EnsExpSuffix = ''
-if ($nEnsDAMembers > 1) then
-  set EnsExpSuffix = '_NMEM'${nEnsDAMembers}
-  if (${RTPPInflationFactor} != "0.0") set EnsExpSuffix = ${EnsExpSuffix}_RTPP${RTPPInflationFactor}
-  if (${LeaveOneOutEDA} == True) set EnsExpSuffix = ${EnsExpSuffix}_LeaveOneOut
-  if (${ABEInflation} == True) set EnsExpSuffix = ${EnsExpSuffix}_ABEI_BT${ABEIChannel}
-endif
-
-#(2) add observation selection info
-setenv ExpObsName ''
-foreach obs ($variationalObsList)
-  set isBench = False
-  foreach benchObs ($benchmarkObsList)
-    if ("$obs" =~ *"$benchObs"*) then
-      set isBench = True
-    endif
-  end
-  if ( $isBench == False ) then
-    setenv ExpObsName ${ExpObsName}_${obs}
-  endif
-end

@@ -44,7 +44,7 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua-cld_n15
     obsdatain:
@@ -86,7 +86,7 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua-cld_n18
     obsdatain:
@@ -128,7 +128,7 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua-cld_metop-a
     obsdatain:
@@ -170,7 +170,7 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua-cld_metop-b
     obsdatain:
@@ -208,7 +208,7 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType
 - obs space:
     name: amsua-cld_aqua
     obsdatain:
@@ -246,4 +246,4 @@
       EndianType: little_endian
       CoefficientPath: CRTMTABLES
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType

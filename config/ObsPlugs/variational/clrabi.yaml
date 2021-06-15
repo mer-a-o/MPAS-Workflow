@@ -62,4 +62,4 @@
     - name: brightness_temperature_jacobian_surface_temperature
       channels: *clrabi_channels
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType

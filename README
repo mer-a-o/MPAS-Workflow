@@ -55,6 +55,8 @@ filestructure.csh: workflow file structure
 
 job.csh: job queue settings
 
+obs.csh: observation-space experiment configuration
+
 obsdata.csh: static observation-space data file structure
 
 tools.csh: initializes python tools for workflow task management

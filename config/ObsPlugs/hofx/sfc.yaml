@@ -1,5 +1,5 @@
 - obs space:
-    name: SfcPCorrected
+    name: sfc
     obsdatain:
       obsfile: InDBDir/sfc_obs_2018041500.h5
     obsdataout:
@@ -20,4 +20,4 @@
     value: surface_altitude@GeoVaLs
     threshold: 200.0
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType

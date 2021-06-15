@@ -37,14 +37,15 @@ endif
 
 # Setup environment
 # =================
+source config/appindex.csh
+source config/obs.csh
 source config/experiment.csh
+source config/obsdata.csh
 source config/filestructure.csh
 source config/tools.csh
 source config/modeldata.csh
-source config/obsdata.csh
 source config/mpas/variables.csh
 source config/mpas/${MPASGridDescriptor}/mesh.csh
-source config/appindex.csh
 source config/builds.csh
 set yymmdd = `echo ${CYLC_TASK_CYCLE_POINT} | cut -c 1-8`
 set hh = `echo ${CYLC_TASK_CYCLE_POINT} | cut -c 10-11`
@@ -186,11 +187,9 @@ end
 
 # Link conventional data
 # ======================
-ln -sfv $ConventionalObsDir/${thisValidDate}/aircraft_obs*.h5 ${InDBDir}/
-ln -sfv $ConventionalObsDir/${thisValidDate}/gnssro_obs*.h5 ${InDBDir}/
-ln -sfv $ConventionalObsDir/${thisValidDate}/satwind_obs*.h5 ${InDBDir}/
-ln -sfv $ConventionalObsDir/${thisValidDate}/sfc_obs*.h5 ${InDBDir}/
-ln -sfv $ConventionalObsDir/${thisValidDate}/sondes_obs*.h5 ${InDBDir}/
+foreach obsType ($conventionalObsList)
+  ln -sfv $ConventionalObsDir/${thisValidDate}/${obsType}_obs*.h5 ${InDBDir}/
+end
 
 # Link AMSUA+MHS data
 # ==============
@@ -223,24 +222,24 @@ set nIndent = $applicationObsIndent[$myAppIndex]
 set obsIndent = "`${nSpaces} $nIndent`"
 
 ## Add selected observations (see control.csh)
-set checkForMissingObs = (sondes aircraft satwind gnssro sfc amsua mhs abi ahi)
+set checkForMissingObs = (${conventionalObsList} amsua mhs abi ahi)
 set found = 0
 set obsYAML = observations.yaml
 rm $obsYAML
 touch $obsYAML
-foreach obs ($self_ObsList)
-  echo "Preparing YAML for ${obs} observations"
+foreach obsType ($self_ObsList)
+  echo "Preparing YAML for ${obsType} observations"
   set missing=0
-  set SUBYAML=${ConfigDir}/ObsPlugs/${self_AppType}/${obs}
-  if ( "$obs" =~ *"sondes"* ) then
+  set SUBYAML=${ConfigDir}/ObsPlugs/${self_AppType}/${obsType}
+  if ( "$obsType" =~ *"sondes"* ) then
     #KLUDGE to handle missing qv for sondes at single time
     if ( ${thisValidDate} == 2018043006 ) then
       set SUBYAML=${SUBYAML}-2018043006
     endif
   endif
-  # check that obs string matches at least one non-broken observation file link
+  # check that obsType string matches at least one non-broken observation file link
   foreach inst ($checkForMissingObs)
-    if ( "$obs" =~ *"${inst}"* ) then
+    if ( "$obsType" =~ *"${inst}"* ) then
       find ${InDBDir}/${inst}*_obs_*.h5 -mindepth 0 -maxdepth 0
       if ($? > 0) then
         @ missing++
@@ -254,11 +253,17 @@ foreach obs ($self_ObsList)
   end
 
   if ($missing == 0) then
-    echo "${obs} data is present and selected; adding ${obs} to the YAML"
+    echo "${obsType} data is present and selected; adding ${obsType} to the YAML"
     sed 's/^/'"$obsIndent"'/' ${SUBYAML}.yaml >> $obsYAML
+
+    # TODO: add common interp type here for all obsType
+    #       requires individual amsua/mhs yaml stubs for each platform.
+    ### Horizontal interpolation type
+    #echo "$obsIndent  get values:" >> $obsYAML
+    #echo "$obsIndent    interpolation type: ${ObsInterpolationType}" >> $obsYAML
     @ found++
   else
-    echo "${obs} data is selected, but missing; NOT adding ${obs} to the YAML"
+    echo "${obsType} data is selected, but missing; NOT adding ${obsType} to the YAML"
   endif
 end
 if ($found == 0) then
@@ -272,7 +277,8 @@ cat $obsYAML >> $thisYAML
 # are zero observations available
 
 ## Horizontal interpolation type
-sed -i 's@InterpolationType@'${InterpolationType}'@g' $thisYAML
+sed -i 's@ObsInterpolationType@'${ObsInterpolationType}'@g' $thisYAML
+sed -i 's@GeometryInterpolationType@'${GeometryInterpolationType}'@g' $thisYAML
 
 ## QC characteristics
 sed -i 's@RADTHINDISTANCE@'${RADTHINDISTANCE}'@g' $thisYAML

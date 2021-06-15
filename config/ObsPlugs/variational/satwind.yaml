@@ -1,5 +1,5 @@
 - obs space:
-    name: Satwind
+    name: satwind
     obsdatain:
       obsfile: InDBDir/satwind_obs_2018041500.h5
       max frame size: 80000
@@ -33,4 +33,4 @@
 #  - filter: Gaussian_Thinning
 #    horizontal_mesh: RADTHINDISTANCE #km
   get values:
-    interpolation type: InterpolationType
+    interpolation type: ObsInterpolationType

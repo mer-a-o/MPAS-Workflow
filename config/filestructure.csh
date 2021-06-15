@@ -1,5 +1,6 @@
 #!/bin/csh -f
 
+source config/obs.csh
 source config/experiment.csh
 source config/mpas/${MPASGridDescriptor}/mesh.csh
 source config/builds.csh
@@ -10,6 +11,36 @@ source config/benchmark.csh
 # While any variable may be changed, doing so may prevent restart or re-verification of previously
 # executed experiments
 
+########################
+## experiment name parts
+########################
+
+## derive experiment title parts from external settings
+
+#(1) populate ensemble-related suffix components
+set EnsExpSuffix = ''
+if ($nEnsDAMembers > 1) then
+  set EnsExpSuffix = '_NMEM'${nEnsDAMembers}
+  if (${RTPPInflationFactor} != "0.0") set EnsExpSuffix = ${EnsExpSuffix}_RTPP${RTPPInflationFactor}
+  if (${LeaveOneOutEDA} == True) set EnsExpSuffix = ${EnsExpSuffix}_LeaveOneOut
+  if (${ABEInflation} == True) set EnsExpSuffix = ${EnsExpSuffix}_ABEI_BT${ABEIChannel}
+endif
+
+#(2) add observation selection info
+setenv ExpObsName ''
+foreach obs ($variationalObsList)
+  set isBench = False
+  foreach benchObs ($benchmarkObsList)
+    if ("$obs" =~ *"$benchObs"*) then
+      set isBench = True
+    endif
+  end
+  if ( $isBench == False ) then
+    setenv ExpObsName ${ExpObsName}_${obs}
+  endif
+end
+
+## TMPDIR for cheyenne
 # TODO: move TMPDIR creation to individul jobs or common cylc environment setup script, similar
 # to how jediPrep.csh is used
 setenv TMPDIR /glade/scratch/${USER}/temp
