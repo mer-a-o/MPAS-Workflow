@@ -32,8 +32,14 @@ set CriticalPathType = Normal
 
 ## VerifyDeterministicDA: whether to run verification scripts for
 #    obs feedback files from DA.  Does not work for ensemble DA.
+#    Only works when CriticalPathType == Normal.
 # OPTIONS: True/False
 set VerifyDeterministicDA = True
+
+## CompareDA2Benchmark: compare verification nc files between two experiments
+#    after the DA verification completes
+# OPTIONS: True/False
+set CompareDA2Benchmark = False
 
 ## VerifyExtendedMeanFC: whether to run verification scripts across
 #    extended forecast states, first intialized at mean analysis
@@ -45,6 +51,11 @@ set VerifyExtendedMeanFC = False
 #    individual ensemble member analyses or deterministic analysis
 # OPTIONS: True/False
 set VerifyBGMembers = True
+
+## CompareBG2Benchmark: compare verification nc files between two experiments
+#    after the BGMembers verification completes
+# OPTIONS: True/False
+set CompareBG2Benchmark = False
 
 ## VerifyEnsMeanBG: whether to run verification scripts for ensemble
 #    mean background state.
@@ -108,8 +119,10 @@ cat >! suite.rc << EOF
 # cycling components
 {% set CriticalPathType = "${CriticalPathType}" %}
 {% set VerifyDeterministicDA = ${VerifyDeterministicDA} %}
+{% set CompareDA2Benchmark = ${CompareDA2Benchmark} %}
 {% set VerifyExtendedMeanFC = ${VerifyExtendedMeanFC} %}
 {% set VerifyBGMembers = ${VerifyBGMembers} %}
+{% set CompareBG2Benchmark = ${CompareBG2Benchmark} %}
 {% set VerifyEnsMeanBG = ${VerifyEnsMeanBG} %}
 {% set DiagnoseEnsSpreadBG = ${DiagnoseEnsSpreadBG} %}
 {% set VerifyANMembers = ${VerifyANMembers} %}
@@ -133,7 +146,7 @@ cat >! suite.rc << EOF
   {% set PrimaryCPGraph = PrimaryCPGraph + "\\n        CyclingFC" %}
   {% set PrimaryCPGraph = PrimaryCPGraph + "\\n        CyclingFC:succeed-all => CyclingFCFinished" %}
   {% set PrimaryCPGraph = PrimaryCPGraph + "\\n        CyclingDAFinished" %}
-{% else %}
+{% elif CriticalPathType == "Normal" %}
   {% set PrimaryCPGraph = PrimaryCPGraph + "\\n        CyclingFCFinished[-PT${CyclingWindowHR}H]" %}
   {% if (ABEInflation and nEnsDAMembers > 1) %}
     {% set PrimaryCPGraph = PrimaryCPGraph + " => MeanBackground" %}
@@ -149,6 +162,8 @@ cat >! suite.rc << EOF
   {% set PrimaryCPGraph = PrimaryCPGraph + "\\n        CyclingDAFinished => CyclingFC" %}
   {% set PrimaryCPGraph = PrimaryCPGraph + "\\n        CyclingFC:succeed-all => CyclingFCFinished" %}
   {% set SecondaryCPGraph = SecondaryCPGraph + "\\n        CyclingDAFinished => CleanCyclingDA" %}
+{# else #}
+#TODO: indicate invalid CriticalPathType
 {% endif %}
 # verification and extended forecast controls
 {% set ExtendedFCLengths = range(0, ${ExtendedFCWindowHR}+${ExtendedFC_DT_HR}, ${ExtendedFC_DT_HR}) %}
@@ -174,7 +189,7 @@ cat >! suite.rc << EOF
       graph = '''{{PrimaryCPGraph}}{{SecondaryCPGraph}}
       '''
 ## Many kinds of verification
-{% if VerifyDeterministicDA and nEnsDAMembers < 2 %}
+{% if CriticalPathType == "Normal" and VerifyDeterministicDA and nEnsDAMembers < 2 %}
 #TODO: enable VerifyObsDA to handle more than one ensemble member
 #      and use feedback files from EDA for VerifyEnsMeanBG
 ## Verification of deterministic DA with observations (BG+AN together)
@@ -182,6 +197,9 @@ cat >! suite.rc << EOF
       graph = '''
         CyclingDAFinished => VerifyObsDA
         VerifyObsDA => CleanCyclingDA
+  {% if CompareDA2Benchmark %}
+        VerifyObsDA => CompareObsDA
+  {% endif %}
       '''
 {% endif %}
 {% if VerifyExtendedMeanFC %}
@@ -206,6 +224,10 @@ cat >! suite.rc << EOF
   {% for mem in EnsVerifyMembers %}
         HofXBG{{mem}} => VerifyObsBG{{mem}}
         VerifyObsBG{{mem}} => CleanHofXBG{{mem}}
+    {% if CompareBG2Benchmark %}
+        VerifyModelBG{{mem}} => CompareModelBG{{mem}}
+        VerifyObsBG{{mem}} => CompareObsBG{{mem}}
+    {% endif %}
   {% endfor %}
       '''
 {% endif %}
@@ -300,6 +322,13 @@ cat >! suite.rc << EOF
       -q = ${VFQueueName}
       -A = ${VFAccountNumber}
       -l = select=${VerifyObsNodes}:ncpus=${VerifyObsPEPerNode}:mpiprocs=${VerifyObsPEPerNode}
+  [[CompareBase]]
+    [[[job]]]
+      execution time limit = PT5M
+    [[[directives]]]
+      -q = ${VFQueueName}
+      -A = ${VFAccountNumber}
+      -l = select=1:ncpus=36:mpiprocs=36
   [[CleanBase]]
     [[[job]]]
       batch system = background
@@ -335,6 +364,9 @@ cat >! suite.rc << EOF
   [[VerifyObsDA]]
     inherit = VerifyObsBase
     script = \$origin/VerifyObsDA.csh "1" "0" "DA" "0"
+  [[CompareObsDA]]
+    inherit = CompareBase
+    script = \$origin/CompareObsDA.csh "1" "0" "DA" "0"
   [[CleanCyclingDA]]
     inherit = CleanBase
     script = \$origin/CleanCyclingDA.csh
@@ -387,10 +419,10 @@ cat >! suite.rc << EOF
     inherit = CleanBase
     script = \$origin/CleanHofXMeanFC.csh "1" "{{dt}}" "FC"
   [[VerifyObsMeanFC{{dt}}hr]]
-    inherit = VerifyModelMeanFC
+    inherit = VerifyObsBase
     script = \$origin/VerifyObsMeanFC.csh "1" "{{dt}}" "FC" "0"
   [[VerifyModelMeanFC{{dt}}hr]]
-    inherit = VerifyModelBase
+    inherit = VerifyModelMeanFC
     script = \$origin/VerifyModelMeanFC.csh "1" "{{dt}}" "FC"
 {% endfor %}
   [[ExtendedEnsFC]]
@@ -400,8 +432,12 @@ cat >! suite.rc << EOF
     inherit = HofXBase
   [[VerifyModel{{state}}]]
     inherit = VerifyModelBase
+  [[CompareModel{{state}}]]
+    inherit = CompareBase
   [[VerifyObs{{state}}]]
     inherit = VerifyObsBase
+  [[CompareObs{{state}}]]
+    inherit = CompareBase
   [[CleanHofX{{state}}]]
     inherit = CleanBase
 {% endfor %}
@@ -417,9 +453,15 @@ cat >! suite.rc << EOF
   [[VerifyModel{{state}}{{mem}}]]
     inherit = VerifyModel{{state}}
     script = \$origin/VerifyModel{{state}}.csh "{{mem}}" "0" "{{state}}"
+  [[CompareModel{{state}}{{mem}}]]
+    inherit = CompareModel{{state}}
+    script = \$origin/CompareModel{{state}}.csh "{{mem}}" "0" "{{state}}"
   [[VerifyObs{{state}}{{mem}}]]
     inherit = VerifyObs{{state}}
     script = \$origin/VerifyObs{{state}}.csh "{{mem}}" "0" "{{state}}" "0"
+  [[CompareObs{{state}}{{mem}}]]
+    inherit = CompareObs{{state}}
+    script = \$origin/CompareObs{{state}}.csh "{{mem}}" "0" "{{state}}" "0"
   [[CleanHofX{{state}}{{mem}}]]
     inherit = CleanHofX{{state}}
     script = \$origin/CleanHofX{{state}}.csh "{{mem}}" "0" "{{state}}"
@@ -474,6 +516,8 @@ cat >! suite.rc << EOF
     inherit = VerifyObsBase
 {% if DiagnoseEnsSpreadBG %}
     script = \$origin/VerifyObsEnsMeanBG.csh "1" "0" "BG" "{{nEnsDAMembers}}"
+    [[[job]]]
+      execution time limit = PT${VerifyObsEnsMeanJobMinutes}M
 {% else %}
     script = \$origin/VerifyObsEnsMeanBG.csh "1" "0" "BG" "0"
 {% endif %}

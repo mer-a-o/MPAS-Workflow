@@ -69,6 +69,16 @@ if ( "$DAType" =~ *"eda"* ) then
   setenv nEnsDAMembers 20
 else
   setenv nEnsDAMembers 1
+
+  ## fixedEnsBType
+  # selection of data source for fixed ensemble background covariance members
+  # OPTIONS: GEFS (default), PreviousEDA
+  set fixedEnsBType = GEFS
+
+  # tertiary settings for when fixedEnsBType is set to PreviousEDA
+  set nPreviousEnsDAMembers = 20
+  set PreviousEDAForecastDir = \
+    /glade/scratch/guerrett/pandac/guerrett_eda_3denvar_NMEM${nPreviousEnsDAMembers}_LeaveOneOut_OIE120km/CyclingFC
 endif
 
 ## LeaveOneOutEDA
@@ -99,6 +109,7 @@ set ahi = ahi$AHISuperOb[$hofxIndex]
 # OPTIONS: $benchmarkObsList, cldamsua, allmhs, clr$abi, all$abi, clr$ahi, all$ahi
 #TODO: separate amsua and mhs config for each instrument_satellite combo
 
+#TODO: upgrade abi and ahi data
 set hofxObsList = ($benchmarkObsList cldamsua allmhs all$abi all$ahi)
 
 
