@@ -58,9 +58,11 @@
               channels: *ahi_channels
 ## 120 km, no bias correction
           x0: [1, 1, 1]
-          x1: [12.58, 15.65, 19.98]
+#          x1: [12.58, 15.65, 19.98]
+          x1: [7.0, 8.0, 10.0]
           err0: [1.87, 1.85, 2.17]
-          err1: [12.72, 14.65, 15.36]
+#          err1: [12.72, 14.65, 15.36]
+          err1: [8.0, 9.0, 12.0]
   - filter: Background Check
     threshold: 3.0
     apply at iterations: 0, 1
