@@ -36,7 +36,8 @@ set benchmarkObsList = (sondes aircraft satwind gnssroref sfcp clramsua)
 
 ## ExpSuffix
 # a unique suffix to distinguish this experiment from others
-set ExpSuffix = ''
+set ExpSuffix = '_B-LOO20+RTPP80_reducedSCIPeak'
+#set ExpSuffix = '_ioda-v2'
 
 ##############
 ## DA settings
@@ -53,15 +54,15 @@ set ahi = ahi$AHISuperOb[$variationalIndex]
 # all == all-sky
 #TODO: separate amsua and mhs config for each instrument_satellite combo
 
-set variationalObsList = ($benchmarkObsList)
+#set variationalObsList = ($benchmarkObsList)
 #set variationalObsList = ($benchmarkObsList cldamsua)
 #set variationalObsList = ($benchmarkObsList all$abi)
 #set variationalObsList = ($benchmarkObsList all$ahi)
-#set variationalObsList = ($benchmarkObsList all$abi all$ahi)
+set variationalObsList = ($benchmarkObsList all$abi all$ahi)
 
 ## DAType
 # OPTIONS: 3denvar, eda_3denvar, 3dvarId
-setenv DAType eda_3denvar
+setenv DAType 3denvar
 
 if ( "$DAType" =~ *"eda"* ) then
   ## nEnsDAMembers
@@ -73,12 +74,13 @@ else
   ## fixedEnsBType
   # selection of data source for fixed ensemble background covariance members
   # OPTIONS: GEFS (default), PreviousEDA
-  set fixedEnsBType = GEFS
+  set fixedEnsBType = PreviousEDA
 
   # tertiary settings for when fixedEnsBType is set to PreviousEDA
   set nPreviousEnsDAMembers = 20
   set PreviousEDAForecastDir = \
-    /glade/scratch/guerrett/pandac/guerrett_eda_3denvar_NMEM${nPreviousEnsDAMembers}_LeaveOneOut_OIE120km/CyclingFC
+    /glade/scratch/guerrett/pandac/guerrett_eda_3denvar_NMEM20_RTPP0.80_LeaveOneOut_OIE120km_memberSpecificTemplate_GEFSSeaUpdate/CyclingFC
+#    /glade/scratch/guerrett/pandac/guerrett_eda_3denvar_NMEM${nPreviousEnsDAMembers}_LeaveOneOut_OIE120km/CyclingFC
 endif
 
 ## LeaveOneOutEDA
