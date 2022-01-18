@@ -14,8 +14,8 @@ setenv BuildCompiler 'gnu-openmpi'
 # consistent with config/environment.csh
 
 set commonBuild = /glade/work/guerrett/pandac/build/mpas-bundle_gnu-openmpi_03JAN2022
-set commonBuild = /glade/scratch/yonggangyu/br_autotest/build_2022-01-03_09.30.07
-set commonBuild = /glade/scratch/yonggangyu/br_autotest/build
+#set commonBuild = /glade/scratch/yonggangyu/br_autotest/build_2022-01-03_09.30.07
+#set commonBuild = /glade/scratch/yonggangyu/br_autotest/build
 
 # MPAS-JEDI
 # ---------
