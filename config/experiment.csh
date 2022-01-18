@@ -139,7 +139,7 @@ endif
 
 ## LeaveOneOutEDA, whether to use self-exclusion in the EnVar ensemble B during EDA cycling
 # OPTIONS: True/False
-setenv LeaveOneOutEDA True
+setenv LeaveOneOutEDA False
 
 
 ## RTPPInflationFactor, relaxation parameter for the relaxation to prior perturbation (RTPP) inflation mechanism
