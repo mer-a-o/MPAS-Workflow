@@ -1,43 +1,22 @@
 #!/bin/csh -f
 
 source config/mpas/${MPASGridDescriptor}/mesh.csh
+source config/appindex.csh
 
 ## InterpolationType
 # controls the horizontal interpolation used in variational and hofx applications
 # OPTIONS: bump, unstructured
 setenv InterpolationType unstructured
 
-##############
-# Fixed tables
-##############
-set FixedInput = /glade/work/guerrett/pandac/fixed_input
-
-## CRTM
-setenv CRTMTABLES ${FixedInput}/crtm_bin/
-
-## VARBC
-setenv INITIAL_VARBC_TABLE ${FixedInput}/satbias/satbias_crtm_in
+#######
+# VARBC
+#######
+setenv INITIAL_VARBC_TABLE /glade/work/guerrett/pandac/fixed_input/satbias/satbias_crtm_in
 
 
-#####################
-# application indices
-#####################
-
-# NOTE: enables re-use of common components for similar applications
-
-set applicationIndex = ( variational hofx )
-set applicationObsIndent = ( 2 0 )
-
-set index = 0
-foreach application (${applicationIndex})
-  @ index++
-  if ( $application == variational ) then
-    set variationalIndex = $index
-  endif
-  if ( $application == hofx ) then
-    set hofxIndex = $index
-  endif
-end
+#####################################
+# application index-specific settings
+#####################################
 
 ## ABI super-obbing footprint, set independently
 #  for variational and hofx using applicationIndex
@@ -75,6 +54,11 @@ set PolarMWObsDir[$variationalIndex] = $PolarMWObsDir[$variationalIndex]/$PolarM
 
 # no bias correction for hofx
 set PolarMWObsDir[$hofxIndex] = $PolarMWObsDir[$hofxIndex]/$PolarMWNoBias
+
+## Polar IR (iasi, cris)
+set PolarIRObsDir = ()
+set PolarIRObsDir[$variationalIndex] = ${ObsWorkDir}
+set PolarIRObsDir[$hofxIndex] = ${ObsWorkDir}
 
 ## Geostationary IR (abi, ahi)
 # bias correction

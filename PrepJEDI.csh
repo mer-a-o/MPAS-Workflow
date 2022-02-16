@@ -49,9 +49,11 @@ source config/environment.csh
 source config/experiment.csh
 source config/filestructure.csh
 source config/tools.csh
+source config/appindex.csh
 source config/mpas/${MPASGridDescriptor}/mesh.csh
 source config/modeldata.csh
-source config/obsdata.csh
+source config/${obsdata}.csh
+source config/obs/crtm.csh
 source config/mpas/variables.csh
 source config/builds.csh
 set yymmdd = `echo ${CYLC_TASK_CYCLE_POINT} | cut -c 1-8`
@@ -200,42 +202,28 @@ while ( $member <= ${nEnsDAMembers} )
   @ member++
 end
 
-if ( $PreprocessObs == True ) then
-  # conventional
-  # ============
-  ln -sfv ${ObsDir}/aircraft_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/ascat_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/gnssro_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/satwind_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/satwnd_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/sfc_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/sondes_obs*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/profiler_obs*.h5 ${InDBDir}/
+# conventional
+# ============
+ln -sfv $ConventionalObsDir/${thisValidDate}/aircraft_obs_${thisValidDate}.h5 ${InDBDir}/
+ln -sfv $ConventionalObsDir/${thisValidDate}/gnssro_obs_${thisValidDate}.h5 ${InDBDir}/
+ln -sfv gnssro_obs_${thisValidDate}.h5 ${InDBDir}/gnssroref_obs_${thisValidDate}.h5
+ln -sfv $ConventionalObsDir/${thisValidDate}/satwind_obs_${thisValidDate}.h5 ${InDBDir}/
+ln -sfv $ConventionalObsDir/${thisValidDate}/sfc_obs_${thisValidDate}.h5 ${InDBDir}/
+ln -sfv $ConventionalObsDir/${thisValidDate}/sondes_obs_${thisValidDate}.h5 ${InDBDir}/
 
-  # AMSUA+MHS+IASI
-  # =========
-  ln -sfv ${ObsDir}/amsua*_obs_*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/mhs*_obs_*.h5 ${InDBDir}/
-  ln -sfv ${ObsDir}/iasi*_obs_${thisValidDate}.h5 ${InDBDir}/
-else
-  # conventional
-  # ============
-  ln -sfv $ConventionalObsDir/${thisValidDate}/aircraft_obs*.h5 ${InDBDir}/
-  ln -sfv $ConventionalObsDir/${thisValidDate}/gnssro_obs*.h5 ${InDBDir}/
-  ln -sfv $ConventionalObsDir/${thisValidDate}/satwind_obs*.h5 ${InDBDir}/
-  ln -sfv $ConventionalObsDir/${thisValidDate}/sfc_obs*.h5 ${InDBDir}/
-  ln -sfv $ConventionalObsDir/${thisValidDate}/sondes_obs*.h5 ${InDBDir}/
+# AMSUA+MHS
+# =========
+ln -sfv $PolarMWObsDir[$myAppIndex]/${thisValidDate}/amsua*_obs_${thisValidDate}.h5 ${InDBDir}/
+ln -sfv $PolarMWObsDir[$myAppIndex]/${thisValidDate}/mhs*_obs_${thisValidDate}.h5 ${InDBDir}/
 
-  # AMSUA+MHS
-  # =========
-  ln -sfv $PolarMWObsDir[$myAppIndex]/${thisValidDate}/amsua*_obs_*.h5 ${InDBDir}/
-  ln -sfv $PolarMWObsDir[$myAppIndex]/${thisValidDate}/mhs*_obs_*.h5 ${InDBDir}/
+# IASI
+# =========
+ln -sfv $PolarIRObsDir[$myAppIndex]/${thisValidDate}/iasi*_obs_${thisValidDate}.h5 ${InDBDir}/
 
-  # ABI+AHI
-  # =======
-  ln -sfv $ABIObsDir[$myAppIndex]/${thisValidDate}/abi*_obs_*.h5 ${InDBDir}/
-  ln -sfv $AHIObsDir[$myAppIndex]/${thisValidDate}/ahi*_obs_*.h5 ${InDBDir}/
-endif
+# ABI+AHI
+# =======
+ln -sfv $ABIObsDir[$myAppIndex]/${thisValidDate}/abi*_obs_${thisValidDate}.h5 ${InDBDir}/
+ln -sfv $AHIObsDir[$myAppIndex]/${thisValidDate}/ahi${thisValidDate}_obs_*.h5 ${InDBDir}/
 
 # VarBC prior
 # ===========

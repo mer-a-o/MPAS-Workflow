@@ -26,6 +26,11 @@ setenv InitializationType WarmStart
 # specific time periods
 # OPTIONS: True/False
 setenv PreprocessObs = False
+if (${PreprocessObs} == True)
+  setenv obsdata = "obs/online"
+else
+  setenv obsdata = "obs/fromarchive"
+endif
 
 
 ##################################

@@ -33,10 +33,10 @@ foreach part ($workflowParts)
 end
 
 source config/tools.csh
-source config/modeldata.csh
-source config/obsdata.csh
 source config/mpas/variables.csh
 source config/experiment.csh
+source config/modeldata.csh
+source config/${obsdata}.csh
 source config/mpas/${MPASGridDescriptor}/mesh.csh
 
 ## First cycle "forecast" established offline
